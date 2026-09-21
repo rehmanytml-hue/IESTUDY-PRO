@@ -494,14 +494,19 @@ export default function IETimeStudyApp() {
     const shiftTotalMinutes = strengthConfig.workingHours * 60;
     const calcOutputPerShift = smv > 0 ? Math.floor((strengthConfig.operatorCount * shiftTotalMinutes * (strengthConfig.lineEfficiency / 100)) / smv) : 0;
 
-    // Cost Per Piece (CPP) = (Total Daily Manpower Cost) / (Target Output)
+    // Efficiency & CPP calculations
     const totalDailyCost = strengthConfig.operatorCount * strengthConfig.dailyWagePerOperator;
     const cpp = strengthConfig.targetOutput > 0 ? totalDailyCost / strengthConfig.targetOutput : 0;
+    
+    // Formula: Efficiency = (output * SAM) / (shift time * operators)
+    const totalShiftMinutesAvailable = strengthConfig.operatorCount * (strengthConfig.workingHours * 60);
+    const totalMinutesEarned = strengthConfig.targetOutput * smv;
+    const calculatedEfficiency = totalShiftMinutesAvailable > 0 ? (totalMinutesEarned / totalShiftMinutesAvailable) * 100 : 0;
 
     const handleSubTabChange = (tab) => {
       setCalcSubTab(tab);
       if (tab === 'cpp') {
-        // Auto-sync operator count to calculated line strength when switching to CPP
+        // Auto-sync operator count to calculated line strength when switching to Efficiency & CPP
         setStrengthConfig(prev => ({ ...prev, operatorCount: roundedOperatorsNeeded }));
       }
     };
@@ -510,7 +515,9 @@ export default function IETimeStudyApp() {
       <div className="animate-fade-in max-w-5xl mx-auto space-y-6">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 flex flex-wrap justify-between items-center gap-4 transition-colors">
           <div>
-            <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Line Strength, Targets & Cost Per Piece (CPP)</h2>
+            <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">
+              {calcSubTab === 'cpp' ? 'Efficiency & Cost Per Piece (CPP) Calculator' : 'Line Strength, Targets & Cost Per Piece'}
+            </h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Select tool module to compute manpower strength, outputs, or financial cost per piece.</p>
           </div>
 
@@ -531,7 +538,7 @@ export default function IETimeStudyApp() {
               onClick={() => handleSubTabChange('cpp')}
               className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${calcSubTab === 'cpp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
             >
-              CPP Calculator
+              Efficiency & CPP Calc
             </button>
           </div>
         </div>
@@ -544,6 +551,19 @@ export default function IETimeStudyApp() {
 
             <div className="space-y-4">
               {calcSubTab !== 'cpp' && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Line SAM / SMV (Mins)</label>
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    value={strengthConfig.customSmv}
+                    onChange={(e) => setStrengthConfig({...strengthConfig, customSmv: parseFloat(e.target.value) || 0})}
+                    className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-600 outline-none focus:border-emerald-600 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white font-bold font-mono"
+                  />
+                </div>
+              )}
+
+              {calcSubTab === 'cpp' && (
                 <div>
                   <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Line SAM / SMV (Mins)</label>
                   <input 
@@ -656,16 +676,31 @@ export default function IETimeStudyApp() {
             )}
 
             {calcSubTab === 'cpp' && (
-              <div className="bg-gradient-to-br from-emerald-600 to-teal-800 p-8 rounded-2xl text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden flex flex-col justify-between">
-                <div className="absolute top-0 right-0 p-4 opacity-10"><DollarSign size={120} /></div>
-                <div>
-                  <div className="text-emerald-200 text-xs font-black uppercase tracking-widest mb-1 relative z-10">Cost Per Piece (CPP)</div>
-                  <div className="text-6xl font-black mb-3 tracking-tighter relative z-10">
-                    Rs. {cpp.toFixed(2)}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-teal-600 to-emerald-700 p-6 rounded-2xl text-white shadow-xl shadow-teal-500/20 relative overflow-hidden flex flex-col justify-between">
+                  <div className="absolute top-0 right-0 p-4 opacity-10"><Target size={100} /></div>
+                  <div>
+                    <div className="text-teal-200 text-xs font-black uppercase tracking-widest mb-1 relative z-10">Calculated Line Efficiency</div>
+                    <div className="text-5xl font-black mb-2 tracking-tighter relative z-10">
+                      {calculatedEfficiency.toFixed(1)}%
+                    </div>
+                    <p className="text-teal-100 text-xs font-medium relative z-10">
+                      Computed via output, SAM, shift hours & operators.
+                    </p>
                   </div>
-                  <p className="text-emerald-100 text-sm font-medium relative z-10">
-                    Total Manpower Cost: <strong className="underline">Rs. {(strengthConfig.operatorCount * strengthConfig.dailyWagePerOperator).toLocaleString()}</strong> ({strengthConfig.operatorCount} operators) for {strengthConfig.targetOutput} pcs target.
-                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-emerald-600 to-teal-800 p-6 rounded-2xl text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden flex flex-col justify-between">
+                  <div className="absolute top-0 right-0 p-4 opacity-10"><DollarSign size={100} /></div>
+                  <div>
+                    <div className="text-emerald-200 text-xs font-black uppercase tracking-widest mb-1 relative z-10">Cost Per Piece (CPP)</div>
+                    <div className="text-5xl font-black mb-2 tracking-tighter relative z-10">
+                      Rs. {cpp.toFixed(2)}
+                    </div>
+                    <p className="text-emerald-100 text-xs font-medium relative z-10">
+                      Manpower Cost: Rs. {(strengthConfig.operatorCount * strengthConfig.dailyWagePerOperator).toLocaleString()}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

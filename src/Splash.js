@@ -27,7 +27,7 @@ export default function Splash() {
       <div className="sp-title mt-6 text-3xl font-black tracking-tight">
         IE<span className="opacity-80">StudyPro</span>
       </div>
-      <div className="sp-sub mt-1 text-sm font-medium text-emerald-100">Time study &amp; target estimation</div>
+      <div className="sp-sub mt-1 text-sm font-medium text-emerald-100">Time study, targets &amp; line strength</div>
       <style>{`
         .sp-ring { stroke-dasharray: 100; stroke-dashoffset: 100; animation: spDraw 0.9s ease-out 0.1s forwards; }
         .sp-top, .sp-btn { opacity: 0; animation: spIn 0.3s ease-out 0.8s forwards; }

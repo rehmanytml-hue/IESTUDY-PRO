@@ -9,6 +9,7 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import History, { useUser } from './History';
 import { useUpdateCheck } from './updater';
+import Splash from './Splash';
 
 const formatTime = (timeInMs) => {
   const minutes = Math.floor(timeInMs / 60000);
@@ -780,6 +781,7 @@ export default function IETimeStudyApp() {
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
+      <Splash />
       <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-slate-200 font-sans pb-20 md:pb-0 print:bg-white transition-colors duration-300">
         
         <header className="bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700/50 sticky top-0 z-50 print:hidden transition-colors">

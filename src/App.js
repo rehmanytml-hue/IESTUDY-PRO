@@ -855,6 +855,13 @@ export default function IETimeStudyApp() {
           {mainModule === 'strength_cpp' && renderStrengthAndCppView()}
         </main>
 
+        {updater.isNative && (
+          <div className="px-4 pb-24 text-center text-xs text-slate-400 dark:text-slate-500 print:hidden">
+            Version {updater.version ?? '?'} · {updater.status}{' '}
+            <button onClick={updater.check} className="font-bold text-emerald-600 dark:text-emerald-400 underline">Check for updates</button>
+          </div>
+        )}
+
         <nav className="md:hidden fixed bottom-0 w-full bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-700/50 flex justify-around p-2 pb-safe print:hidden z-50 transition-colors">
           <button 
             onClick={() => setMainModule('study')}

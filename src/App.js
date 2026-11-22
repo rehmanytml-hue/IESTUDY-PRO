@@ -114,6 +114,21 @@ export default function IETimeStudyApp() {
     lastUpdateRef.current = performance.now();
   };
 
+  // Stop: end the current cycle (record it if it has time) and halt the timer.
+  const stopStudy = () => {
+    cancelAnimationFrame(timerRef.current);
+    setIsRunning(false);
+    if (elapsedTime > 0) {
+      setCycles(prev => [...prev, {
+        id: Date.now(),
+        time: elapsedTime,
+        isExcluded: false,
+        reason: ''
+      }]);
+    }
+    setElapsedTime(0);
+  };
+
   const resetStudy = () => {
     stopTimer();
     setElapsedTime(0);
@@ -276,6 +291,13 @@ export default function IETimeStudyApp() {
                   <Play size={28} fill="currentColor" />
                   <span>Resume</span>
                 </button>
+                {elapsedTime > 0 && <button 
+                onClick={stopStudy}
+                className="col-span-2 bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800 text-white p-4 rounded-2xl font-bold text-lg shadow-lg shadow-slate-500/30 dark:shadow-slate-900/40 transition-all active:scale-95 flex justify-center items-center gap-2"
+              >
+                <Square size={22} fill="currentColor" />
+                <span>Stop &amp; Save Cycle</span>
+                </button>}
               </>
             )
           ) : (
@@ -293,6 +315,13 @@ export default function IETimeStudyApp() {
               >
                 <Pause size={28} fill="currentColor" />
                 <span>Pause</span>
+              </button>
+              <button 
+                onClick={stopStudy}
+                className="col-span-2 bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800 text-white p-4 rounded-2xl font-bold text-lg shadow-lg shadow-slate-500/30 dark:shadow-slate-900/40 transition-all active:scale-95 flex justify-center items-center gap-2"
+              >
+                <Square size={22} fill="currentColor" />
+                <span>Stop &amp; Save Cycle</span>
               </button>
             </>
           )}

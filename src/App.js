@@ -857,7 +857,7 @@ export default function IETimeStudyApp() {
 
         {updater.isNative && (
           <div className="px-4 pb-24 text-center text-xs text-slate-400 dark:text-slate-500 print:hidden">
-            Version {updater.version ?? '?'} · {updater.status}{' '}
+            IE Study Pro · Build {updater.version ?? '?'} · {updater.status}{' '}
             <button onClick={updater.check} className="font-bold text-emerald-600 dark:text-emerald-400 underline">Check for updates</button>
           </div>
         )}

@@ -32,10 +32,14 @@ jobs:
           echo "KEYSTORE_FILE=$RUNNER_TEMP/iestudy.keystore" >> $GITHUB_ENV
           echo "KEYSTORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
       - run: cd android && chmod +x gradlew && ./gradlew assembleRelease -PappVersionCode=$VERSION_CODE
-      - run: cp android/app/build/outputs/apk/release/app-release.apk IEStudyPro.apk
+      - run: |
+          cp android/app/build/outputs/apk/release/app-release.apk IEStudyPro.apk
+          echo '{"build": ${{ github.run_number }}}' > version.json
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
           name: IE Study Pro build ${{ github.run_number }}
-          files: IEStudyPro.apk
+          files: |
+            IEStudyPro.apk
+            version.json
           make_latest: true

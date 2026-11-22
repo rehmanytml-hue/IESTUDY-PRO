@@ -3,8 +3,11 @@ import {
   Play, Square, RotateCcw, Clock, ClipboardList, 
   Settings, CheckCircle, AlertTriangle, Download, 
   BarChart3, User, Scissors, Package, Shirt, Factory, Target,
-  Moon, Sun, RefreshCw, Pause, Users, Calculator, DollarSign, Layers
+  Cloud, Moon, Sun, RefreshCw, Pause, Users, Calculator, DollarSign, Layers
 } from 'lucide-react';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from './firebase';
+import History, { useUser } from './History';
 
 const formatTime = (timeInMs) => {
   const minutes = Math.floor(timeInMs / 60000);
@@ -61,6 +64,8 @@ export default function IETimeStudyApp() {
     dailyWagePerOperator: 1600, // Predefined 1600 PKR
   });
 
+  const { user } = useUser();
+  const [saveMsg, setSaveMsg] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [cycles, setCycles] = useState([]);
@@ -104,6 +109,29 @@ export default function IETimeStudyApp() {
   const goToTab = (tab) => {
     if (tab !== 'study') stopTimer();
     setActiveTab(tab);
+  };
+
+  const saveStudy = (results) => {
+    if (!user || !db) { goToTab('history'); return; }
+    // Not awaited: offline, Firestore queues the write and syncs it when back online.
+    addDoc(collection(db, 'users', user.uid, 'studies'), {
+      config,
+      cycles,
+      smv: results.smvInMinutes,
+      targetPerHour: results.targetPerHour,
+      targetPerShift: results.targetPerShift,
+      createdAt: serverTimestamp(),
+    }).catch(() => setSaveMsg('Save failed'));
+    setSaveMsg('Saved. Syncs when online.');
+    setTimeout(() => setSaveMsg(''), 3000);
+  };
+
+  const openStudy = (s) => {
+    stopTimer();
+    setConfig(s.config);
+    setCycles(s.cycles || []);
+    setElapsedTime(0);
+    setActiveTab('results');
   };
 
   const recordCycle = () => {
@@ -413,6 +441,9 @@ export default function IETimeStudyApp() {
           <div className="flex gap-3">
              <button onClick={() => setActiveTab('study')} className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
                Back to Timer
+             </button>
+             <button onClick={() => saveStudy(results)} className="px-4 py-2 bg-slate-800 dark:bg-slate-600 text-white font-bold rounded-xl hover:opacity-90 transition-all active:scale-95 flex items-center gap-2">
+               <Cloud size={18} /> {saveMsg || 'Save Study'}
              </button>
              <button onClick={() => window.print()} className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2">
                <Download size={18} /> Export
@@ -789,6 +820,7 @@ export default function IETimeStudyApp() {
                   { id: 'setup', label: 'Setup', icon: Settings },
                   { id: 'study', label: 'Timer', icon: Clock },
                   { id: 'results', label: 'Report', icon: BarChart3 },
+                  { id: 'history', label: 'Saved', icon: Cloud },
                 ].map(({ id, label, icon: Icon }) => (
                   <button
                     key={id}
@@ -802,6 +834,7 @@ export default function IETimeStudyApp() {
               {activeTab === 'setup' && renderSetupView()}
               {activeTab === 'study' && renderStudyView()}
               {activeTab === 'results' && renderResultsView()}
+              {activeTab === 'history' && <History user={user} onOpen={openStudy} />}
             </>
           )}
 

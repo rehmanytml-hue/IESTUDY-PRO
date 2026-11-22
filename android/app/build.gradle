@@ -18,7 +18,7 @@ android {
         applicationId "com.iestudy.pro"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode (project.findProperty("appVersionCode") ?: "1").toInteger()
+        versionCode = Integer.parseInt((project.findProperty("appVersionCode") ?: "1").toString())
         versionName "1.0.${project.findProperty("appVersionCode") ?: "1"}"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {

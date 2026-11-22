@@ -6,6 +6,8 @@
   "main": "src/index.tsx",
   "dependencies": {
     "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
     "@capacitor/core": "^8.6.2",
     "firebase": "^13.4.0",
     "lucide-react": "1.47.0",

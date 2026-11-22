@@ -3,10 +3,13 @@ on:
   workflow_dispatch:
   push:
     branches: [ccr-03d69828-e5vdop]
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      VERSION_CODE: ${{ github.run_number }}
       REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY }}
       REACT_APP_FIREBASE_AUTH_DOMAIN: ${{ secrets.REACT_APP_FIREBASE_AUTH_DOMAIN }}
       REACT_APP_FIREBASE_PROJECT_ID: ${{ secrets.REACT_APP_FIREBASE_PROJECT_ID }}
@@ -22,8 +25,17 @@ jobs:
       - run: npm install --legacy-peer-deps
       - run: npm run android:sync
         env: { CI: 'false' }
-      - run: cd android && chmod +x gradlew && ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
+      - name: Restore signing key
+        run: |
+          test -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" || { echo "Missing ANDROID_KEYSTORE_BASE64 secret"; exit 1; }
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > $RUNNER_TEMP/iestudy.keystore
+          echo "KEYSTORE_FILE=$RUNNER_TEMP/iestudy.keystore" >> $GITHUB_ENV
+          echo "KEYSTORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+      - run: cd android && chmod +x gradlew && ./gradlew assembleRelease -PappVersionCode=$VERSION_CODE
+      - run: cp android/app/build/outputs/apk/release/app-release.apk IEStudyPro.apk
+      - uses: softprops/action-gh-release@v2
         with:
-          name: IEStudyPro-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          tag_name: v${{ github.run_number }}
+          name: IE Study Pro build ${{ github.run_number }}
+          files: IEStudyPro.apk
+          make_latest: true

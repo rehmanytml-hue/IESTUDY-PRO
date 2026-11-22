@@ -8,6 +8,7 @@ import {
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import History, { useUser } from './History';
+import { useUpdateCheck } from './updater';
 
 const formatTime = (timeInMs) => {
   const minutes = Math.floor(timeInMs / 60000);
@@ -65,6 +66,7 @@ export default function IETimeStudyApp() {
   });
 
   const { user } = useUser();
+  const updater = useUpdateCheck();
   const [saveMsg, setSaveMsg] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -811,6 +813,16 @@ export default function IETimeStudyApp() {
             </button>
           </div>
         </header>
+
+        {updater.update && (
+          <div className="bg-emerald-600 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-3 print:hidden">
+            <span className="font-bold text-sm">A new version of IE Study Pro is available.</span>
+            <div className="flex gap-2">
+              <button onClick={updater.install} className="px-4 py-1.5 bg-white text-emerald-700 font-bold rounded-lg text-sm">Update</button>
+              <button onClick={updater.dismiss} className="px-3 py-1.5 font-bold text-sm opacity-90">Later</button>
+            </div>
+          </div>
+        )}
 
         <main className="p-4 md:p-8 min-h-[calc(100vh-4rem)]">
           {mainModule === 'study' && (

@@ -30,7 +30,7 @@ export function useUpdateCheck() {
         setStatus(`Version ${latest} available`);
       } else {
         setUpdate(null);
-        setStatus('You're up to date');
+        setStatus("You're up to date");
       }
     } catch (e) {
       setStatus('Could not check. Are you online?');

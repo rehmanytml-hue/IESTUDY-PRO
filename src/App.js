@@ -100,6 +100,12 @@ export default function IETimeStudyApp() {
     }
   };
 
+  // Navigate between study steps; pause the timer when leaving the timer screen.
+  const goToTab = (tab) => {
+    if (tab !== 'study') stopTimer();
+    setActiveTab(tab);
+  };
+
   const recordCycle = () => {
     if (elapsedTime === 0) return;
     
@@ -778,6 +784,21 @@ export default function IETimeStudyApp() {
         <main className="p-4 md:p-8 min-h-[calc(100vh-4rem)]">
           {mainModule === 'study' && (
             <>
+              <div className="max-w-5xl mx-auto mb-6 flex gap-2 print:hidden">
+                {[
+                  { id: 'setup', label: 'Setup', icon: Settings },
+                  { id: 'study', label: 'Timer', icon: Clock },
+                  { id: 'results', label: 'Report', icon: BarChart3 },
+                ].map(({ id, label, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => goToTab(id)}
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === id ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                  >
+                    <Icon size={16} /> {label}
+                  </button>
+                ))}
+              </div>
               {activeTab === 'setup' && renderSetupView()}
               {activeTab === 'study' && renderStudyView()}
               {activeTab === 'results' && renderResultsView()}

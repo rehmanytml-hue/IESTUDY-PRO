@@ -5,10 +5,12 @@
   "keywords": [],
   "main": "src/index.tsx",
   "dependencies": {
+    "@capacitor-community/file-opener": "^8.0.1",
     "@capacitor/android": "^8.6.2",
     "@capacitor/app": "^8.1.2",
     "@capacitor/browser": "^8.0.5",
     "@capacitor/core": "^8.6.2",
+    "@capacitor/filesystem": "^8.1.5",
     "firebase": "^13.4.0",
     "lucide-react": "1.47.0",
     "react": "^19.0.0",

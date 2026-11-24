@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
+import { Directory, Filesystem } from '@capacitor/filesystem';
+import { FileOpener } from '@capacitor-community/file-opener';
 
 const REPO = 'rehmanytml-hue/IESTUDY-PRO';
 
@@ -11,6 +13,8 @@ export function useUpdateCheck() {
   const [update, setUpdate] = useState(null);
   const [version, setVersion] = useState(null);
   const [status, setStatus] = useState('');
+  // idle | downloading | installing | error
+  const [dl, setDl] = useState({ state: 'idle', percent: 0, message: '' });
 
   const check = useCallback(async () => {
     if (!isNative) return;
@@ -37,9 +41,34 @@ export function useUpdateCheck() {
 
   useEffect(() => { check(); }, [check]);
 
+  // Download the APK inside the app, then hand it to Android's installer.
+  const install = useCallback(async () => {
+    if (!update) return;
+    const file = 'IEStudyPro-update.apk';
+    let handle;
+    try {
+      setDl({ state: 'downloading', percent: 0, message: '' });
+      try { await Filesystem.deleteFile({ path: file, directory: Directory.Cache }); } catch (e) { /* none yet */ }
+      handle = await Filesystem.addListener('progress', (p) => {
+        if (p.contentLength > 0) setDl({ state: 'downloading', percent: Math.round((p.bytes / p.contentLength) * 100), message: '' });
+      });
+      const res = await Filesystem.downloadFile({ url: update.url, path: file, directory: Directory.Cache, progress: true });
+      setDl({ state: 'installing', percent: 100, message: '' });
+      await FileOpener.open({ filePath: res.path, contentType: 'application/vnd.android.package-archive', openWithDefault: true });
+      // Android now shows its own install screen. First time, it may ask to allow installs from this app.
+      setDl({ state: 'idle', percent: 0, message: '' });
+    } catch (e) {
+      setDl({ state: 'error', percent: 0, message: String((e && e.message) || e) });
+    } finally {
+      if (handle) handle.remove();
+    }
+  }, [update]);
+
   return {
     isNative, update, version, status, check,
     dismiss: () => setUpdate(null),
-    install: () => Browser.open({ url: update.url }),
+    dl,
+    install,
+    openInBrowser: () => Browser.open({ url: update.url }),
   };
 }

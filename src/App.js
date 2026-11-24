@@ -814,12 +814,34 @@ export default function IETimeStudyApp() {
         </header>
 
         {updater.update && (
-          <div className="bg-emerald-600 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-3 print:hidden">
-            <span className="font-bold text-sm">A new version of IE Study Pro is available.</span>
-            <div className="flex gap-2">
-              <button onClick={updater.install} className="px-4 py-1.5 bg-white text-emerald-700 font-bold rounded-lg text-sm">Update</button>
-              <button onClick={updater.dismiss} className="px-3 py-1.5 font-bold text-sm opacity-90">Later</button>
-            </div>
+          <div className="bg-emerald-600 text-white px-4 py-3 print:hidden">
+            {updater.dl.state === 'idle' && (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="font-bold text-sm">A new version of IE Study Pro is available.</span>
+                <div className="flex gap-2">
+                  <button onClick={updater.install} className="px-4 py-1.5 bg-white text-emerald-700 font-bold rounded-full text-sm">Update now</button>
+                  <button onClick={updater.dismiss} className="px-3 py-1.5 font-bold text-sm opacity-90">Later</button>
+                </div>
+              </div>
+            )}
+            {updater.dl.state === 'downloading' && (
+              <div>
+                <div className="flex justify-between text-sm font-bold mb-2"><span>Downloading update...</span><span>{updater.dl.percent}%</span></div>
+                <div className="h-2 rounded-full bg-emerald-800/50 overflow-hidden"><div className="h-full bg-white rounded-full transition-all" style={{ width: `${updater.dl.percent}%` }} /></div>
+              </div>
+            )}
+            {updater.dl.state === 'installing' && (
+              <div className="text-sm font-bold">Opening the installer... If Android asks, allow installs from this app, then tap Update now again.</div>
+            )}
+            {updater.dl.state === 'error' && (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="text-sm font-bold">Could not install the update. {updater.dl.message}</span>
+                <div className="flex gap-2">
+                  <button onClick={updater.install} className="px-4 py-1.5 bg-white text-emerald-700 font-bold rounded-full text-sm">Try again</button>
+                  <button onClick={updater.openInBrowser} className="px-3 py-1.5 font-bold text-sm underline">Use browser</button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

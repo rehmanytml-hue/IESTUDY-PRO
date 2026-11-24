@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Flat tonal buttons instead of gradients (Material 3 style). */
+.bg-gradient-to-br, .bg-gradient-to-r {
+  background-image: linear-gradient(var(--tw-gradient-from), var(--tw-gradient-from)) !important;
+}
+/* Filled cards have no outline. */
+.border-slate-100 { border-color: transparent; }
+.dark .dark\:border-slate-700\/50 { border-color: transparent; }
+button { -webkit-tap-highlight-color: transparent; }

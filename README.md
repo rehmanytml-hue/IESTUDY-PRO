@@ -11,3 +11,4 @@ Created with CodeSandbox
 5. `npm run android:open`, then build/run in Android Studio (or `cd android && ./gradlew assembleDebug`).
 
 The app bundles all assets, so the timer and calculators work with no connection. Signed-in users get saved studies stored in Firestore's on-device cache, synced when online.
+

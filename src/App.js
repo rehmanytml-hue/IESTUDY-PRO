@@ -10,6 +10,7 @@ import { db } from './firebase';
 import History, { useUser } from './History';
 import { useUpdateCheck } from './updater';
 import Splash from './Splash';
+import MachinePicker, { machineMeta } from './MachinePicker';
 
 const formatTime = (timeInMs) => {
   const minutes = Math.floor(timeInMs / 60000);
@@ -221,16 +222,12 @@ export default function IETimeStudyApp() {
         <div className="grid grid-cols-1 gap-6">
           <div className="space-y-2">
             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Machine Type</label>
-            <select
+            <MachinePicker
+              machines={MACHINE_ALLOWANCES}
+              dark={isDarkMode}
               value={config.machineType}
-              onChange={handleMachineChange}
-              className="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-600 outline-none transition-all bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white appearance-none cursor-pointer font-medium"
-            >
-              <option value="" disabled>Select Machine...</option>
-              {MACHINE_ALLOWANCES.map(m => (
-                <option key={m.id} value={m.name}>{m.name}</option>
-              ))}
-            </select>
+              onChange={(name) => handleMachineChange({ target: { value: name } })}
+            />
           </div>
         </div>
 
@@ -273,7 +270,7 @@ export default function IETimeStudyApp() {
         <button 
           onClick={() => setActiveTab('study')}
           disabled={!config.machineType}
-          className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 dark:from-emerald-500 dark:to-teal-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-500/30 dark:shadow-emerald-900/40 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 text-lg"
+          className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 dark:from-emerald-500 dark:to-teal-600 text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 text-lg"
         >
           <Clock className="stroke-[2.5]" /> Continue to Timer
         </button>
@@ -288,7 +285,7 @@ export default function IETimeStudyApp() {
         <div className="w-full flex justify-between items-center mb-8 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 transition-colors">
            <div className="truncate flex items-center gap-4">
              <div className="p-3 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-xl shadow-sm">
-               <Shirt size={24} />
+               {(() => { const { Icon } = machineMeta(MACHINE_ALLOWANCES.find(m => m.name === config.machineType)); return <Icon size={34} />; })()}
              </div>
              <div>
                <div className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Stitching Machine</div>
@@ -299,7 +296,7 @@ export default function IETimeStudyApp() {
            </div>
         </div>
 
-        <div className="font-mono text-[5rem] md:text-9xl font-black text-slate-800 dark:text-white tracking-tighter my-4 flex items-baseline drop-shadow-sm transition-colors">
+        <div className="tabular-nums text-[4.6rem] md:text-9xl font-light text-slate-800 dark:text-white tracking-tight my-4 flex items-baseline drop-shadow-sm transition-colors">
           {formatTime(elapsedTime)}
         </div>
 
@@ -308,7 +305,7 @@ export default function IETimeStudyApp() {
             elapsedTime === 0 && cycles.length === 0 ? (
               <button 
                 onClick={startTimer}
-                className="col-span-2 bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white p-6 rounded-2xl font-black text-2xl shadow-lg shadow-emerald-500/30 dark:shadow-emerald-900/40 transition-all active:scale-95 flex justify-center items-center gap-3"
+                className="col-span-2 bg-emerald-600 hover:bg-emerald-700 text-white p-7 rounded-[32px] font-bold text-2xl transition-all active:scale-95 flex justify-center items-center gap-3"
               >
                 <Play size={32} fill="currentColor" /> Start Study
               </button>
@@ -316,21 +313,21 @@ export default function IETimeStudyApp() {
               <>
                 <button 
                   onClick={resetStudy}
-                  className="bg-gradient-to-br from-slate-600 to-slate-800 hover:from-slate-500 hover:to-slate-700 text-white p-6 rounded-2xl font-bold text-xl shadow-lg shadow-slate-500/30 dark:shadow-slate-900/40 transition-all active:scale-95 flex flex-col justify-center items-center gap-1"
+                  className="bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-white p-6 rounded-[28px] font-bold text-xl transition-all active:scale-95 flex flex-col justify-center items-center gap-1"
                 >
                   <RefreshCw size={28} />
                   <span>Reset Study</span>
                 </button>
                 <button 
                   onClick={startTimer}
-                  className="bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white p-6 rounded-2xl font-bold text-xl shadow-lg shadow-emerald-500/30 dark:shadow-emerald-900/40 transition-all active:scale-95 flex flex-col justify-center items-center gap-1"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white p-6 rounded-[28px] font-bold text-xl transition-all active:scale-95 flex flex-col justify-center items-center gap-1"
                 >
                   <Play size={28} fill="currentColor" />
                   <span>Resume</span>
                 </button>
                 {elapsedTime > 0 && <button 
                 onClick={stopStudy}
-                className="col-span-2 bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800 text-white p-4 rounded-2xl font-bold text-lg shadow-lg shadow-slate-500/30 dark:shadow-slate-900/40 transition-all active:scale-95 flex justify-center items-center gap-2"
+                className="col-span-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 dark:bg-emerald-900/50 dark:hover:bg-emerald-900/70 dark:text-emerald-100 p-4 rounded-full font-bold text-lg transition-all active:scale-95 flex justify-center items-center gap-2"
               >
                 <Square size={22} fill="currentColor" />
                 <span>Stop &amp; Save Cycle</span>
@@ -341,21 +338,21 @@ export default function IETimeStudyApp() {
             <>
               <button 
                 onClick={recordCycle}
-                className="bg-gradient-to-br from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white p-6 rounded-2xl font-bold text-xl shadow-lg shadow-emerald-500/30 dark:shadow-emerald-900/40 transition-all active:scale-95 flex flex-col justify-center items-center gap-1"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white p-6 rounded-[28px] font-bold text-xl transition-all active:scale-95 flex flex-col justify-center items-center gap-1"
               >
                 <RotateCcw size={28} className="stroke-[2.5]" />
                 <span>Lap / Flyback</span>
               </button>
               <button 
                 onClick={stopTimer}
-                className="bg-gradient-to-br from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 text-white p-6 rounded-2xl font-bold text-xl shadow-lg shadow-rose-500/30 dark:shadow-rose-900/40 transition-all active:scale-95 flex flex-col justify-center items-center gap-1"
+                className="bg-rose-100 hover:bg-rose-200 text-rose-900 dark:bg-rose-900/40 dark:hover:bg-rose-900/60 dark:text-rose-100 p-6 rounded-[28px] font-bold text-xl transition-all active:scale-95 flex flex-col justify-center items-center gap-1"
               >
                 <Pause size={28} fill="currentColor" />
                 <span>Pause</span>
               </button>
               <button 
                 onClick={stopStudy}
-                className="col-span-2 bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800 text-white p-4 rounded-2xl font-bold text-lg shadow-lg shadow-slate-500/30 dark:shadow-slate-900/40 transition-all active:scale-95 flex justify-center items-center gap-2"
+                className="col-span-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 dark:bg-emerald-900/50 dark:hover:bg-emerald-900/70 dark:text-emerald-100 p-4 rounded-full font-bold text-lg transition-all active:scale-95 flex justify-center items-center gap-2"
               >
                 <Square size={22} fill="currentColor" />
                 <span>Stop &amp; Save Cycle</span>
@@ -441,21 +438,21 @@ export default function IETimeStudyApp() {
               {config.machineType && <><span className="opacity-50">•</span> <span className="text-emerald-600 dark:text-emerald-400">{config.machineType}</span></>}
             </div>
           </div>
-          <div className="flex gap-3">
-             <button onClick={() => setActiveTab('study')} className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+          <div className="flex flex-wrap gap-2">
+             <button onClick={() => setActiveTab('study')} className="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold rounded-full whitespace-nowrap hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
                Back to Timer
              </button>
-             <button onClick={() => saveStudy(results)} className="px-4 py-2 bg-slate-800 dark:bg-slate-600 text-white font-bold rounded-xl hover:opacity-90 transition-all active:scale-95 flex items-center gap-2">
+             <button onClick={() => saveStudy(results)} className="px-4 py-2.5 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-100 font-bold rounded-full whitespace-nowrap hover:opacity-90 transition-all active:scale-95 flex items-center gap-2">
                <Cloud size={18} /> {saveMsg || 'Save Study'}
              </button>
-             <button onClick={() => window.print()} className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2">
+             <button onClick={() => window.print()} className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full whitespace-nowrap shadow-md transition-all active:scale-95 flex items-center gap-2">
                <Download size={18} /> Export
              </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-br from-emerald-600 to-teal-700 p-6 rounded-2xl text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-emerald-600 to-teal-700 p-6 rounded-2xl text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10"><Factory size={100} /></div>
             <div className="text-emerald-200 text-xs font-black uppercase tracking-widest mb-2 relative z-10">Standard Minute Value</div>
             <div className="text-6xl font-black mb-1 tracking-tighter relative z-10">{results.smvInMinutes.toFixed(3)}</div>
@@ -782,9 +779,9 @@ export default function IETimeStudyApp() {
   return (
     <div className={isDarkMode ? 'dark' : ''}>
       <Splash />
-      <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-slate-200 font-sans pb-20 md:pb-0 print:bg-white transition-colors duration-300">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#101512] text-slate-800 dark:text-slate-200 font-sans pb-20 md:pb-0 print:bg-white transition-colors duration-300">
         
-        <header className="bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700/50 sticky top-0 z-50 print:hidden transition-colors">
+        <header className="bg-slate-50/90 dark:bg-[#101512]/90 backdrop-blur-md sticky top-0 z-50 print:hidden transition-colors">
           <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-black text-xl tracking-tight">
               <Clock className="stroke-[2.5]" />
@@ -794,13 +791,13 @@ export default function IETimeStudyApp() {
             <div className="hidden md:flex items-center gap-2">
               <button 
                 onClick={() => setMainModule('study')}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${mainModule === 'study' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${mainModule === 'study' ? 'bg-emerald-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
               >
                 Time Study & Target Estimation
               </button>
               <button 
                 onClick={() => setMainModule('strength_cpp')}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${mainModule === 'strength_cpp' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${mainModule === 'strength_cpp' ? 'bg-emerald-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
               >
                 Line Strength & CPP Calculator
               </button>
@@ -808,7 +805,7 @@ export default function IETimeStudyApp() {
 
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              className="p-3 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
               title="Toggle Dark Mode"
             >
               {isDarkMode ? <Sun size={20} className="fill-current" /> : <Moon size={20} className="fill-current" />}
@@ -829,7 +826,7 @@ export default function IETimeStudyApp() {
         <main className="p-4 md:p-8 min-h-[calc(100vh-4rem)]">
           {mainModule === 'study' && (
             <>
-              <div className="max-w-5xl mx-auto mb-6 flex gap-2 print:hidden">
+              <div className="max-w-5xl mx-auto mb-6 flex gap-1 p-1.5 rounded-full bg-slate-200/70 dark:bg-slate-800 print:hidden">
                 {[
                   { id: 'setup', label: 'Setup', icon: Settings },
                   { id: 'study', label: 'Timer', icon: Clock },
@@ -839,7 +836,7 @@ export default function IETimeStudyApp() {
                   <button
                     key={id}
                     onClick={() => goToTab(id)}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === id ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                    className={`flex-1 min-w-0 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-full text-[13px] font-bold transition-all ${activeTab === id ? 'bg-emerald-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
                   >
                     <Icon size={16} /> {label}
                   </button>
@@ -862,21 +859,18 @@ export default function IETimeStudyApp() {
           </div>
         )}
 
-        <nav className="md:hidden fixed bottom-0 w-full bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-700/50 flex justify-around p-2 pb-safe print:hidden z-50 transition-colors">
-          <button 
-            onClick={() => setMainModule('study')}
-            className={`flex flex-col items-center p-2 rounded-xl transition-colors ${mainModule === 'study' ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30' : 'text-slate-400 dark:text-slate-500'}`}
-          >
-            <Clock size={20} className={mainModule === 'study' ? "stroke-[2.5]" : ""} />
-            <span className="text-[10px] font-bold mt-1">Time Study</span>
-          </button>
-          <button 
-            onClick={() => setMainModule('strength_cpp')}
-            className={`flex flex-col items-center p-2 rounded-xl transition-colors ${mainModule === 'strength_cpp' ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30' : 'text-slate-400 dark:text-slate-500'}`}
-          >
-            <Users size={20} className={mainModule === 'strength_cpp' ? "stroke-[2.5]" : ""} />
-            <span className="text-[10px] font-bold mt-1">Strength & CPP</span>
-          </button>
+        <nav className="md:hidden fixed bottom-0 w-full bg-slate-100 dark:bg-[#1a211d] flex justify-around pt-3 pb-safe print:hidden z-50 transition-colors">
+          {[
+            { id: 'study', label: 'Time Study', icon: Clock },
+            { id: 'strength_cpp', label: 'Strength & CPP', icon: Users },
+          ].map(({ id, label, icon: Icon }) => (
+            <button key={id} onClick={() => setMainModule(id)} className="flex-1 flex flex-col items-center gap-1 pb-1">
+              <span className={`px-5 py-1.5 rounded-full transition-colors ${mainModule === id ? 'bg-emerald-200 dark:bg-emerald-800 text-emerald-900 dark:text-emerald-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                <Icon size={22} className={mainModule === id ? 'stroke-[2.5]' : ''} />
+              </span>
+              <span className={`text-xs font-bold ${mainModule === id ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>{label}</span>
+            </button>
+          ))}
         </nav>
         
         <style dangerouslySetInnerHTML={{__html: `
